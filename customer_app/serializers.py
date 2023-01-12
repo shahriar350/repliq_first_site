@@ -81,9 +81,9 @@ class AddressCRUDSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserAddress
         fields = [
-            'id',
-            'user',
+            'uuid',
             'house',
+            'user',
             'street',
             'post_office',
             'police_station',
@@ -91,4 +91,3 @@ class AddressCRUDSerializers(serializers.ModelSerializer):
             'country',
             'state'
         ]
-        read_only_fields = ('user',)

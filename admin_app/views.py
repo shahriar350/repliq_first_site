@@ -202,7 +202,6 @@ class ManufacturerRetrieveUpdateRemoveView(generics.RetrieveUpdateDestroyAPIView
     serializer_class = ManufacturerSerializers
     lookup_field = 'uuid'
 
-
     def perform_destroy(self, instance):
         instance.deleted_at = timezone.now()
         instance.save()
@@ -423,55 +422,63 @@ class BaseProductCreateView(generics.CreateAPIView):
     serializer_class = AdminBaseProductCreateUpdateSerializer
 
 
-class BaseProductRetrieveDeleteView(generics.RetrieveDestroyAPIView):
+class BaseProductRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsSuperAdminOrAdmin]
+    http_method_names = ('get', 'put', 'delete',)
 
     def get_object(self):
-        return BaseProduct.objects.get(pk=self.kwargs.get('product_id'))
+        return BaseProduct.objects.get(uuid=self.kwargs.get('uuid'))
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "GET":
             return BaseProductRetrieveSerializer
+        elif self.request.method == 'PUT':
+            return AdminBaseProductCreateUpdateSerializer
         else:
             return BaseProductSerializer
-
-
-class BaseProductUpdateView(generics.UpdateAPIView):
-    serializer_class = AdminBaseProductCreateUpdateSerializer
-    permission_classes = [IsSuperAdminOrAdmin]
-    http_method_names = ['put']
-
-    def get_object(self):
-        return BaseProduct.objects.get(pk=self.kwargs.get('product_id'))
-
-    # def update(self, request, *args, **kwargs):
-    #     partial = kwargs.pop('partial', False)
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-    #     result = {
-    #         "message": "success",
-    #         "details": serializer.data,
-    #         "status": 200,
-    #
-    #     }
-    #     return Response(result)
-
-
-class BaseProductRemove(generics.DestroyAPIView):
-    permission_classes = [IsSuperAdminOrAdmin]
-
-    def get_serializer_class(self):
-        return BaseProductSerializer
-
-    def get_object(self):
-        return BaseProduct.objects.get(pk=self.kwargs.get('product_id'))
 
     def perform_destroy(self, instance):
         instance.deleted_at = timezone.now()
         instance.save()
         return instance
+
+
+# class BaseProductUpdateView(generics.UpdateAPIView):
+#     serializer_class = AdminBaseProductCreateUpdateSerializer
+#     permission_classes = [IsSuperAdminOrAdmin]
+#     http_method_names = ['put']
+#
+#     def get_object(self):
+#         return BaseProduct.objects.get(pk=self.kwargs.get('product_id'))
+
+# def update(self, request, *args, **kwargs):
+#     partial = kwargs.pop('partial', False)
+#     instance = self.get_object()
+#     serializer = self.get_serializer(instance, data=request.data, partial=partial)
+#     serializer.is_valid(raise_exception=True)
+#     self.perform_update(serializer)
+#     result = {
+#         "message": "success",
+#         "details": serializer.data,
+#         "status": 200,
+#
+#     }
+#     return Response(result)
+
+
+# class BaseProductRemove(generics.DestroyAPIView):
+#     permission_classes = [IsSuperAdminOrAdmin]
+#
+#     def get_serializer_class(self):
+#         return BaseProductSerializer
+#
+#     def get_object(self):
+#         return BaseProduct.objects.get(pk=self.kwargs.get('product_id'))
+#
+#     def perform_destroy(self, instance):
+#         instance.deleted_at = timezone.now()
+#         instance.save()
+#         return instance
 
 
 class SuperUserRegisterCreateView(generics.CreateAPIView):

@@ -66,7 +66,7 @@ class AdminLoginSerializer(serializers.Serializer):
 
 
 class AdminBaseProductCreateUpdateSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
+    uuid = serializers.UUIDField(read_only=True)
     admin = serializers.HiddenField(default=serializers.CurrentUserDefault())
     name = serializers.CharField(max_length=255, required=False)
     category = serializers.PrimaryKeyRelatedField(
@@ -111,7 +111,7 @@ class AdminBaseProductCreateUpdateSerializer(serializers.Serializer):
                 medicine_physical_state=medicine_physical_state,
                 superadmin=admin
             )
-            validated_data['id'] = base_product.id
+            validated_data['uuid'] = base_product.uuid
             for category in categories:
                 base_product.category.add(category)
             for ingredient in active_ingredients:

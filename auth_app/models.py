@@ -62,7 +62,7 @@ class CustomUserManager(BaseUserManager):
 
 class Users(DirtyFieldsMixin, AbstractBaseUser, PermissionsMixin):
     name = models.CharField(_('Your name'), max_length=100)
-    slug = AutoSlugField(populate_from='name',editable=False,unique=True)
+    slug = AutoSlugField(populate_from='name', editable=False, unique=True)
     phone_number = PhoneNumberField(blank=True, unique=True)
     superuser = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
@@ -133,7 +133,7 @@ class Users(DirtyFieldsMixin, AbstractBaseUser, PermissionsMixin):
 
 class MerchantInformation(DirtyFieldsMixin, PreModel):
     user = models.OneToOneField(Users, related_name="get_user_information", on_delete=models.CASCADE)
-    slug = AutoSlugField(unique_with='user__name',editable=False,unique=True)
+    slug = AutoSlugField(unique_with='user__name', editable=False, unique=True)
     merchant_domain = models.ForeignKey(Tenant, related_name="get_tenant_users", on_delete=models.SET_NULL, null=True,
                                         blank=True)
     merchant_parent_who_created = models.ForeignKey(Users, related_name='get_merchant_children',
@@ -149,7 +149,7 @@ class MerchantInformation(DirtyFieldsMixin, PreModel):
 class UserAddress(DirtyFieldsMixin, PreModel):
     user = models.ForeignKey(Users, related_name="get_user_addresses", on_delete=models.SET_NULL, null=True,
                              blank=True)
-    slug = AutoSlugField(unique_with='user__name',editable=False,unique=True)                  
+    slug = AutoSlugField(populate_from='user_name', unique_with='user__name', editable=False, unique=True)
     house = models.CharField(verbose_name="House number", max_length=255, null=True, blank=True)
     street = models.CharField(verbose_name="Street name", max_length=255, null=True, blank=True)
     post_office = models.CharField(verbose_name="Post office name", max_length=255)
@@ -157,3 +157,7 @@ class UserAddress(DirtyFieldsMixin, PreModel):
     city = models.CharField(verbose_name="City name", max_length=255)
     country = models.CharField(verbose_name="Country name", max_length=255)
     state = models.CharField(verbose_name="State name", max_length=255, null=True, blank=True)
+
+    @property
+    def user_name(self):
+        return self.user.name

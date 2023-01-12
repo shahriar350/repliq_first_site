@@ -62,13 +62,20 @@ class CartCurrentListView(APIView):
         return Response(status=200, data=CartModelSerialiser(cart).data)
 
 
-class AddressListCreateAPIView(ListCreateAPIView):
+class AddressCreateAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = UserAddress.objects.all()
     serializer_class = AddressCRUDSerializers
 
 
-class AddressRetieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+class AddressListAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AddressCRUDSerializers
+
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user).all()
+
+
+class AddressRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = AddressCRUDSerializers
 

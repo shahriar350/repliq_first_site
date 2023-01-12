@@ -9,14 +9,15 @@ urlpatterns = [
          name='cart.update.remove.product'),
     # path('cart/product/<uuid:cart_product_uuid>/', views.UpdateToCartView.as_view(),
     #      name='cart.update.product'),
-    path('cart/', views.CartListView.as_view(),
+    path('carts/', views.CartListView.as_view(),
          name='cart.list'),
     path('cart/current/', views.CartCurrentListView.as_view(),
          name='cart.current.list'),
 
     # User Address
-    path('address/', views.AddressListCreateAPIView.as_view(), name='address.list.create'),
-    path('address/<uuid:uuid>/', views.AddressRetieveUpdateDestroyAPIView.as_view(),
+    path('addresses/', views.AddressListAPIView.as_view(), name='address.list'),
+    path('address/', views.AddressCreateAPIView.as_view(), name='address.create'),
+    path('address/<uuid:uuid>/', views.AddressRetrieveUpdateDestroyAPIView.as_view(),
          name='address.retrieve.update.destroy')
 
 ]

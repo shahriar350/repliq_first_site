@@ -31,6 +31,7 @@ class TestAddressAPI(APITestCase):
             country="string",
             state="string"
         )
+        print(self.address.slug)
 
         UserAddress.objects.create(
             user=self.user,
@@ -44,7 +45,7 @@ class TestAddressAPI(APITestCase):
         )
 
     def test_list_address(self):
-        url = reverse('customer:address.list.create')
+        url = reverse('customer:address.list')
 
         response = self.client.get(url)
         address = UserAddress.objects.all()
@@ -55,7 +56,7 @@ class TestAddressAPI(APITestCase):
     def test_create_address(self):
         """Test creating address."""
 
-        url = reverse('customer:address.list.create')
+        url = reverse('customer:address.create')
 
         payload = {
             "house": "string",

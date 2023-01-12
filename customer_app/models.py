@@ -18,6 +18,10 @@ class Cart(DirtyFieldsMixin, PreModel):
     customer = models.ForeignKey(User, related_name="get_customer_carts", on_delete=models.CASCADE)
     slug = AutoSlugField(unique_with='customer__name',editable=False,unique=True)
 
+    @property
+    def get_customer_name(self):
+        return self.customer.name
+
 
 class CartProduct(DirtyFieldsMixin, PreModel):
     cart = models.ForeignKey(Cart, related_name='get_cart_products', on_delete=models.CASCADE)
