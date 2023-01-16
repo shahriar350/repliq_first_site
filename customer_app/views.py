@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from customer_app.models import Cart
 from customer_app.serializers import CartProductSerializer, CartProductUpdateSerializer, \
-    CartModelSerialiser, AddressCRUDSerializers
+    CartModelSerialiser, AddressCRUDSerializers, CheckoutSerializer
 from rest_framework.permissions import IsAuthenticated
 from auth_app.models import UserAddress
 
@@ -81,3 +81,8 @@ class AddressRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return UserAddress.objects.filter(user=self.request.user).get(uuid=self.kwargs.get('uuid'))
+
+
+class CheckoutView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CheckoutSerializer

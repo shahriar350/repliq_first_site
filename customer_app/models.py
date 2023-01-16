@@ -4,6 +4,7 @@ from dirtyfields import DirtyFieldsMixin
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum, F
 
 from auth_app.models import UserAddress
 from pharmaco_backend.utils import PreModel
@@ -16,11 +17,16 @@ User = get_user_model()
 # Create your models here.
 class Cart(DirtyFieldsMixin, PreModel):
     customer = models.ForeignKey(User, related_name="get_customer_carts", on_delete=models.CASCADE)
-    slug = AutoSlugField(unique_with='customer__name',editable=False,unique=True)
+    slug = AutoSlugField(unique_with='customer__name', editable=False, unique=True)
+    completed = models.BooleanField(default=False)
 
     @property
     def get_customer_name(self):
         return self.customer.name
+
+    @property
+    def total_price(self):
+        return self.get_cart_products.all().aggregate(total=Sum(F('product__selling_price') * F('quantity')))['total']
 
 
 class CartProduct(DirtyFieldsMixin, PreModel):
@@ -33,12 +39,20 @@ class CartProduct(DirtyFieldsMixin, PreModel):
 
 
 class Checkout(DirtyFieldsMixin, PreModel):
-    slug = AutoSlugField(unique_with='customer__name',editable=False,unique=True)
+    payment_choices = (
+        (0, 'Cash On Delivery'),
+    )
+    slug = AutoSlugField(populate_from='user_name', unique_with='customer__name', editable=False, unique=True)
     customer = models.ForeignKey(User, blank=True, on_delete=models.CASCADE, related_name='user_checkouts')
     cart = models.ForeignKey(Cart, blank=True, on_delete=models.CASCADE, related_name='cart_checkout')
     total_price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
     location = models.ForeignKey(UserAddress, on_delete=models.CASCADE, related_name="user_address_checkouts")
     completed = models.BooleanField(default=False)
+    payment_method = models.SmallIntegerField(choices=payment_choices)
+
+    @property
+    def user_name(self):
+        return self.customer.name
 
 
 class CheckoutProduct(DirtyFieldsMixin, PreModel):

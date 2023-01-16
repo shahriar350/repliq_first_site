@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 
-from auth_app.models import Users, MerchantInformation
+from auth_app.models import Users, MerchantInformation, UserAddress
 from client_app.models import Tenant
 from customer_app.models import Cart, CartProduct
 from merchant_app.tests.test_crud_product import create_product_preload
@@ -17,6 +17,17 @@ class TestCartAction(APITestCase):
             name="saifullah",
             phone_number="+8801752495466",
             password="123456"
+        )
+        self.address = UserAddress.objects.create(
+            user=self.user,
+            house='hello',
+            street='hello',
+            post_office='hello',
+            police_station='hello',
+            city='hello',
+            country='hello',
+            state='hello',
+
         )
         merchant_owner = Users.objects.create_merchant_owner(
             name="saifullah",
@@ -124,6 +135,7 @@ class TestCartAction(APITestCase):
         cart = Cart.objects.create(
             customer=self.user
         )
+        self.cart_slug = cart.slug
         cart_prod = CartProduct.objects.create(
             cart=cart,
             product=self.product,
@@ -137,3 +149,14 @@ class TestCartAction(APITestCase):
         cart_url = reverse('customer:cart.current.list')
         res = self.client.get(cart_url)
         self.assertEqual(res.status_code, 200)
+
+    def test_checkout(self):
+        self.test_product_current_list()
+        url = reverse('customer:checkout')
+        payload = {
+            'cart': self.cart_slug,
+            'address': self.address.slug,
+            'payment': 0,
+        }
+        res = self.client.post(url, payload, format='json')
+        self.assertEqual(res.status_code, 201)

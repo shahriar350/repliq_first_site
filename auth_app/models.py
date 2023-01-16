@@ -149,6 +149,7 @@ class MerchantInformation(DirtyFieldsMixin, PreModel):
 class UserAddress(DirtyFieldsMixin, PreModel):
     user = models.ForeignKey(Users, related_name="get_user_addresses", on_delete=models.SET_NULL, null=True,
                              blank=True)
+    label = models.CharField(max_length=255, null=True, blank=True)
     slug = AutoSlugField(populate_from='user_name', unique_with='user__name', editable=False, unique=True)
     house = models.CharField(verbose_name="House number", max_length=255, null=True, blank=True)
     street = models.CharField(verbose_name="Street name", max_length=255, null=True, blank=True)

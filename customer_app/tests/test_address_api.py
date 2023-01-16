@@ -31,7 +31,6 @@ class TestAddressAPI(APITestCase):
             country="string",
             state="string"
         )
-        print(self.address.slug)
 
         UserAddress.objects.create(
             user=self.user,

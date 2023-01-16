@@ -1,8 +1,11 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator
+from django.db import transaction, IntegrityError
 from django.db.models import Q
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from customer_app.models import Cart, CartProduct
+from customer_app.models import Cart, CartProduct, Checkout, CheckoutProduct
 from product_app.models import Product
 from auth_app.models import UserAddress
 
@@ -91,3 +94,59 @@ class AddressCRUDSerializers(serializers.ModelSerializer):
             'country',
             'state'
         ]
+
+
+class CheckoutSerializer(serializers.Serializer):
+    payment_choices = (
+        (0, 'Cash On Delivery'),
+    )
+    slug = serializers.SlugField(read_only=True)
+    cart = serializers.SlugField()
+    address = serializers.SlugField()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    payment = serializers.ChoiceField(choices=payment_choices)
+
+    def validate(self, attrs):
+        if not Cart.objects.filter(Q(customer=attrs.get('user')) & Q(slug=attrs.get('cart'))).exists():
+            raise ValidationError({'cart': "Invalid cart"})
+        if not UserAddress.objects.filter(Q(user=attrs.get('user')) & Q(slug=attrs.get('address'))).exists():
+            raise ValidationError({'address': "Invalid address"})
+        return attrs
+
+    def create(self, validated_data):
+        cart = Cart.objects.prefetch_related('get_cart_products__product').get(slug=validated_data.get('cart'))
+        cart_products = cart.get_cart_products.all()
+        with transaction.atomic():
+            checkout = Checkout.objects.create(
+                location_id=UserAddress.objects.get(slug=validated_data.get('address')).id,
+                cart_id=cart.id,
+                total_price=cart.total_price,
+                customer=validated_data.get('user'),
+                payment_method=validated_data.get('payment')
+            )
+            validated_data['slug'] = checkout.slug
+            for cart_product in cart_products:
+                CheckoutProduct.objects.create(
+                    checkout=checkout,
+                    product=cart_product.product,
+                    quantity=cart_product.quantity,
+                    selling_price=cart_product.product.selling_price
+                )
+        return validated_data
+        # try:
+        #     checkout = Checkout.objects.create(
+        #         location_id=validated_data.get('address'),
+        #         cart_id=validated_data.get('cart'),
+        #         total_price=cart.total_price,
+        #         customer=validated_data.get('user'),
+        #         payment_method=validated_data.get('payment')
+        #     )
+        #     for cart_product in cart_products:
+        #         CheckoutProduct.objects.create(
+        #             checkout=checkout,
+        #             product=cart_product.product,
+        #             quantity=cart_product.quantity,
+        #             selling_price=cart_product.product.selling_price
+        #         )
+        # except IntegrityError:
+        #     raise ValidationError("Something is wrong. Please try again")

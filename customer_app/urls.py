@@ -18,6 +18,7 @@ urlpatterns = [
     path('addresses/', views.AddressListAPIView.as_view(), name='address.list'),
     path('address/', views.AddressCreateAPIView.as_view(), name='address.create'),
     path('address/<uuid:uuid>/', views.AddressRetrieveUpdateDestroyAPIView.as_view(),
-         name='address.retrieve.update.destroy')
+         name='address.retrieve.update.destroy'),
+    path('checkout/', views.CheckoutView.as_view(), name='checkout')
 
 ]
