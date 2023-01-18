@@ -5,6 +5,12 @@ from admin_app.models import Category, Brand, Ingredient, Manufacturer, Supplier
     RouteOfAdministration
 from auth_app.models import Users
 
+from faker import Faker
+import random
+from product_app.models import BaseProduct
+
+fake = Faker()
+
 
 class Command(BaseCommand):
     help = 'Closes the specified poll for voting'
@@ -24,31 +30,64 @@ class Command(BaseCommand):
         routeOfAdministrations = ["routeOfAdministrations", "routeOfAdministrations1", "routeOfAdministrations3",
                                   "routeOfAdministrations2", "routeOfAdministrations4"]
         with transaction.atomic():
+            categories_id = []
             for category in categories:
-                Category.objects.create(
+                cat = Category.objects.create(
                     name=category
                 )
+                categories_id.append(cat.id)
             for i in manufacturers:
-                Manufacturer.objects.create(
+                Manufacturer_id = []
+                manu = Manufacturer.objects.create(
                     name=i
                 )
+                Manufacturer_id.append(manu.id)
             for i in suppliers:
-                Supplier.objects.create(
+                suppliers_id = []
+                supp = Supplier.objects.create(
                     name=i
                 )
+                suppliers_id.append(supp.id)
             for i in medicinePhysicalStates:
-                MedicinePhysicalState.objects.create(
+                medicinePhysicalStates_id = []
+                mps = MedicinePhysicalState.objects.create(
                     name=i
                 )
+                medicinePhysicalStates_id.append(mps.id)
             for i in routeOfAdministrations:
-                RouteOfAdministration.objects.create(
+                routeOfAdministrations_id = []
+                roa = RouteOfAdministration.objects.create(
                     name=i
                 )
+                routeOfAdministrations_id.append(roa.id)
             for brand in brands:
-                Brand.objects.create(
+                brands_id = []
+                brands = Brand.objects.create(
                     name=brand
                 )
+                brands_id.append(brands.id)
             for ingredient in ingredients:
-                Ingredient.objects.create(
+                ingredients_id = []
+                ing = Ingredient.objects.create(
                     name=ingredient
                 )
+                ingredients_id.append(ing.id)
+
+            super_admin = Users.objects.create_superuser(
+                name='shiblu',
+                phone_number='+8801772115060',
+                password='pass123'
+            )
+            for i in range(20):
+                base_product = BaseProduct.objects.create(
+                    superadmin=super_admin,
+                    name=fake.name(),
+                    description=fake.name(),
+                    dosage_form=fake.name(),
+                    manufacturer_id=random.choice(Manufacturer_id),
+                    brand_id=random.choice(brands_id),
+                    route_of_administration_id=random.choice(routeOfAdministrations_id),
+                    medicine_physical_state_id=random.choice(medicinePhysicalStates_id)
+                )
+                base_product.category.add(random.choice(categories_id))
+                base_product.active_ingredient.add(random.choice(ingredients_id))

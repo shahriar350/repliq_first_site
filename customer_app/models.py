@@ -33,6 +33,7 @@ class CartProduct(DirtyFieldsMixin, PreModel):
     cart = models.ForeignKey(Cart, related_name='get_cart_products', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name="get_product_carts", on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    merchant = models.ForeignKey(User, related_name='get_merchant_carts', on_delete=models.CASCADE, blank=True)
 
     def __str__(self):
         return self.product.base_product.name
@@ -48,6 +49,7 @@ class Checkout(DirtyFieldsMixin, PreModel):
     total_price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
     location = models.ForeignKey(UserAddress, on_delete=models.CASCADE, related_name="user_address_checkouts")
     completed = models.BooleanField(default=False)
+    delivery_charge = models.DecimalField(default=0, decimal_places=2, max_digits=10)
     payment_method = models.SmallIntegerField(choices=payment_choices)
 
     @property
@@ -60,6 +62,8 @@ class CheckoutProduct(DirtyFieldsMixin, PreModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='get_product_checkouts')
     selling_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField(blank=True, validators=[MinValueValidator(1)])
+    merchant = models.ForeignKey(User, related_name='get_merchant_checkoutproducts', on_delete=models.CASCADE,
+                                 blank=True)
 
 
 class CheckoutDeliveryStatus(DirtyFieldsMixin, PreModel):

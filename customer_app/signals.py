@@ -3,7 +3,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from customer_app.models import Cart, Checkout, CheckoutDeliveryStatus
+from customer_app.models import Cart, Checkout, CheckoutDeliveryStatus, CartProduct, CheckoutProduct
 from pharmaco_backend.utils import create_slug
 
 
@@ -25,3 +25,15 @@ def create(sender, instance, created, **kwargs):
                 checkout=instance,
                 status=0
             )
+
+
+@receiver(pre_save, sender=CartProduct)
+def add_merchant_id_to_cartproduct(sender, instance, **kwargs):
+    if instance.pk is None:
+        instance.merchant = instance.product.merchant
+
+
+@receiver(pre_save, sender=CheckoutProduct)
+def add_merchant_id_to_checkoutproduct(sender, instance, **kwargs):
+    if instance.pk is None:
+        instance.merchant = instance.product.merchant

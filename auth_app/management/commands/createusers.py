@@ -57,3 +57,9 @@ class Command(BaseCommand):
                 merchant_parent_who_created=mer_admin,
                 company_name="Saif company"
             )
+            # create user
+            user = Users.objects.create_user(
+                name="saifullah",
+                phone_number="+8801752495445",
+                password="123456",
+            )

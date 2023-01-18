@@ -6,7 +6,7 @@ from django.db.models import Q
 from versatileimagefield.fields import PPOIField, VersatileImageField
 
 from admin_app.models import Category, Ingredient, Manufacturer, Brand, Supplier, RouteOfAdministration, \
-    MedicinePhysicalState
+    MedicinePhysicalState, PoliceStation
 from client_app.models import Tenant
 from pharmaco_backend.utils import PreModel
 
@@ -100,6 +100,7 @@ class ProductImage(DirtyFieldsMixin, PreModel):
         'Image PPOI'
     )
 
+
 # class ProductVariation(DirtyFieldsMixin, PreModel):
 #     product = models.ForeignKey(Product, related_name='get_product_variation_prices', on_delete=models.CASCADE)
 #     buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -136,3 +137,7 @@ class ProductImage(DirtyFieldsMixin, PreModel):
 #                                   related_name="get_attribute_productvariationattribute",
 #                                   null=True, blank=True)
 #     attribute_value = models.CharField(max_length=255)
+class DeliveryMethod(DirtyFieldsMixin, PreModel):
+    police = models.OneToOneField(PoliceStation, on_delete=models.CASCADE, related_name='get_station_delivery_method',
+                                  null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=100)

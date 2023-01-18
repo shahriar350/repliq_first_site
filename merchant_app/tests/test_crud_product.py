@@ -141,7 +141,9 @@ class TestMerchant(APITestCase):
             }
             res = self.client.put(url, payload, type="json")
             self.assertEqual(res.status_code, 200)
+
             # remove that image
+
             produ = Product.objects.prefetch_related('get_product_images').get(slug=self.prod.slug)
             image = produ.get_product_images.first()
 

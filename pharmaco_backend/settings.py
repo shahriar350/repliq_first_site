@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-zsyea_&fo!f&yn7oj9vzot6*k1j-g2wcywp#b-mo@k7(%*bu4*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'merchant_app.apps.MerchantAppConfig',
     'product_app.apps.ProductAppConfig',
     'customer_app.apps.CustomerAppConfig',
+    'search_app.apps.SearchAppConfig',
 
     'drf_spectacular',
 
@@ -174,3 +175,6 @@ CORS_ALLOWED_ORIGINS = [
 # CSRF_COOKIE_NAME = 'csrf_bongo'
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://localhost:4000', "http://127.0.0.1:5173"]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+SPECTACULAR_SETTINGS = {
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
+}

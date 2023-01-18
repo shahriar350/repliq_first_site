@@ -17,7 +17,7 @@ class MerchantLoginSerializer(serializers.Serializer):
 class MerchantRegisterSerializer(serializers.Serializer):
     phone_number = PhoneNumberField()
     full_name = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=255, read_only=True)
     repeat_password = serializers.CharField(max_length=255)
 
     def validate_phone_number(self, data):
@@ -246,3 +246,9 @@ class MerchantProductImageAddSerializer(serializers.Serializer):
                 product=instance
             )
         return validated_data
+
+
+class MerchantProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"

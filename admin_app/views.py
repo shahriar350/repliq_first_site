@@ -408,7 +408,7 @@ class AdminLoginView(generics.CreateAPIView):
     @extend_schema(
         summary="Only superadmin can login",
         responses={
-            200: OpenApiResponse(description='Login Successful'),
+            200: OpenApiResponse(description='Login Successful', response=AdminLoginSerializer),
             400: OpenApiResponse(description='Phone number or password or both are wrong.'),
         },
     )

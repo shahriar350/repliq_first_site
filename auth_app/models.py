@@ -10,6 +10,7 @@ from versatileimagefield.fields import VersatileImageField, PPOIField
 from autoslug import AutoSlugField
 from client_app.models import Tenant
 from pharmaco_backend.utils import PreModel
+import uuid
 
 
 # Create your models here.
@@ -61,8 +62,12 @@ class CustomUserManager(BaseUserManager):
 
 
 class Users(DirtyFieldsMixin, AbstractBaseUser, PermissionsMixin):
+    class Meta:
+        verbose_name_plural = "users"
+
     name = models.CharField(_('Your name'), max_length=100)
     slug = AutoSlugField(populate_from='name', editable=False, unique=True)
+    uuid = models.UUIDField(editable=False, default=uuid.uuid4())
     phone_number = PhoneNumberField(blank=True, unique=True)
     superuser = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
@@ -132,7 +137,8 @@ class Users(DirtyFieldsMixin, AbstractBaseUser, PermissionsMixin):
 
 
 class MerchantInformation(DirtyFieldsMixin, PreModel):
-    user = models.OneToOneField(Users, related_name="get_user_information", on_delete=models.CASCADE)
+    user = models.OneToOneField(Users, related_name="get_user_information", on_delete=models.CASCADE,
+                                limit_choices_to={'merchant': True})
     slug = AutoSlugField(unique_with='user__name', editable=False, unique=True)
     merchant_domain = models.ForeignKey(Tenant, related_name="get_tenant_users", on_delete=models.SET_NULL, null=True,
                                         blank=True)
@@ -140,6 +146,7 @@ class MerchantInformation(DirtyFieldsMixin, PreModel):
                                                     on_delete=models.SET_NULL,
                                                     verbose_name="only merchant id can be here because only merchant can create their children like admin or staff.",
                                                     null=True,
+                                                    limit_choices_to={'merchant': True},
                                                     blank=True)
     company_name = models.CharField(max_length=255, null=True, blank=True)
     tax_number = models.CharField(max_length=255, null=True, blank=True)

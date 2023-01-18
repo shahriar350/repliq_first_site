@@ -1,23 +1,26 @@
 from datetime import timedelta
 
 from django.contrib.auth import authenticate
+from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.generics import CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveUpdateDestroyAPIView, \
+    ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from merchant_app.documentation_serializers import MerchantLogin200Serializer
 from merchant_app.serializers import MerchantLoginSerializer, MerchantRegisterSerializer, MerchantInfoSerializer, \
     MerchantProductCreateSerializer, CreateMerchantAdminSerializer, MerchantProductUpdateSerializer, \
-    MerchantProductImageAddSerializer
+    MerchantProductImageAddSerializer, MerchantProductSerializer
 from otp_app.models import UserOTP
 from pharmaco_backend.permissions import IsMerchant, IsMerchantOwnerOrAdmin, IsMerchantAdmin, IsMerchantOwner
 from pharmaco_backend.utils import otpgen
-from product_app.models import Product
+from product_app.models import Product, BaseProduct
 
 
 # Create your views here.
@@ -110,9 +113,7 @@ class UpdateDestroyProductInfoView(RetrieveUpdateDestroyAPIView):
 
 class RestoreProductInfoView(DestroyAPIView):
     permission_classes = [IsMerchant]
-
-    def get_serializer_class(self, *args, **kwargs):
-        return None
+    serializer_class = MerchantProductSerializer
 
     def get_object(self):
         return Product.objects.get(slug=self.kwargs.get('product_slug'))
@@ -123,6 +124,7 @@ class RestoreProductInfoView(DestroyAPIView):
 
 
 class AddImageProductView(UpdateAPIView):
+    permission_classes = [IsMerchant]
     serializer_class = MerchantProductImageAddSerializer
     parser_classes = (FormParser, MultiPartParser,)
 
@@ -134,6 +136,9 @@ class AddImageProductView(UpdateAPIView):
 
 
 class RemoveImageFromProductView(DestroyAPIView):
+    permission_classes = [IsMerchant]
+    serializer_class = MerchantProductImageAddSerializer
+
     def get_object(self):
         try:
             product = Product.objects.select_related('base_product').prefetch_related('get_product_images',

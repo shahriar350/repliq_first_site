@@ -22,12 +22,7 @@ class AddToCartView(CreateAPIView):
 class RemoveUpdateToCartView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     http_method_names = ['put', 'delete']
-
-    def get_serializer_class(self, *args, **kwargs):
-        if self.request.method == 'PUT':
-            return CartProductUpdateSerializer
-        else:
-            return None
+    serializer_class = CartProductUpdateSerializer
 
     def perform_destroy(self, instance):
         instance.delete()
