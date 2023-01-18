@@ -152,3 +152,10 @@ class RemoveImageFromProductView(DestroyAPIView):
 
         except Product.DoesNotExist:
             raise NotFound(detail="Product cannot found.")
+
+
+class MerchantAuthCheckView(ListAPIView):
+    permission_classes = [IsMerchant]
+
+    def get(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_200_OK)

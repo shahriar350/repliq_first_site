@@ -9,6 +9,7 @@ urlpatterns = [
     path('auth/info/add/', views.MerchantInfoAddView.as_view(), name='auth.info.add'),
 
     path('auth/create/staff/', views.AuthCreateMerchantAdminView.as_view(), name="auth.create.admin"),
+    path('auth/check/', views.MerchantAuthCheckView.as_view(), name="auth.check"),
 
     # product for merchant
     path('product/', views.AddProductView.as_view(), name="product.create"),
