@@ -1,9 +1,13 @@
+import io
 import random
 import string
 import uuid
 
+from PIL import Image
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.text import slugify
+from rest_framework.pagination import PageNumberPagination
 
 
 class PreModel(models.Model):
@@ -46,3 +50,22 @@ def random_int_with_n_digits_not_starting_with_zero(n):
 
 def otpgen():
     return random_int_with_n_digits_not_starting_with_zero(6)
+
+
+class PageNumberPaginationWithCount(PageNumberPagination):
+    page_size = 20
+
+    def get_paginated_response(self, data):
+        response = super(PageNumberPaginationWithCount, self).get_paginated_response(data)
+        response.data['total_pages'] = self.page.paginator.num_pages
+        return response
+
+
+def generate_image() -> InMemoryUploadedFile:
+    img = Image.new('RGB', (100, 100), color=(73, 109, 137))
+    img_io = io.BytesIO()
+    img.save(img_io, 'JPEG')
+    img_file = InMemoryUploadedFile(img_io, None, ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(15)) + ".jpg"
+                                    , 'image/jpeg', img_io.getbuffer().nbytes, None)
+    return img_file

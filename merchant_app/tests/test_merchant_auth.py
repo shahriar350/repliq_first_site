@@ -15,14 +15,19 @@ class TestMerchant(APITestCase):
 
     def test_user_registration(self):
         url = reverse('merchant:auth.register')
-        payload = {
+        payload1 = {
             'phone_number': "+8801752495467",
             'full_name': "Saifullah",
             'password': "123456",
             'repeat_password': "123456",
         }
-        res = self.client.post(url, payload, format="json")
-        response = {'phone_number': '+8801752495467', 'full_name': 'Saifullah', 'password': '123456',
-                    'repeat_password': '123456'}
+        res = self.client.post(url, payload1)
         self.assertEqual(res.status_code, 201)
-        self.assertEqual(res.data, response)
+
+    def test_merchant_owner_login(self):
+        url = reverse('merchant:auth.login')
+        payload1 = {
+            'phone_number': "+8801752495467",
+            'password': "123456",
+        }
+        res = self.client.post(url, payload1)

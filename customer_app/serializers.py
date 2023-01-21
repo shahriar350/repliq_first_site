@@ -5,6 +5,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from admin_app.models import DeliveryCharge
 from customer_app.models import Cart, CartProduct, Checkout, CheckoutProduct
 from product_app.models import Product
 from auth_app.models import UserAddress
@@ -90,7 +91,7 @@ class AddressCRUDSerializers(serializers.ModelSerializer):
             'street',
             'post_office',
             'police_station',
-            'city',
+            'district',
             'country',
             'state'
         ]
@@ -117,36 +118,26 @@ class CheckoutSerializer(serializers.Serializer):
         cart = Cart.objects.prefetch_related('get_cart_products__product').get(slug=validated_data.get('cart'))
         cart_products = cart.get_cart_products.all()
         with transaction.atomic():
+            user_address = UserAddress.objects.get(slug=validated_data.get('address'))
+            delivery_charge = DeliveryCharge.objects.filter(district=user_address.district)
+            charge = 100
+            if delivery_charge.exists():
+                charge = delivery_charge.first().charge
             checkout = Checkout.objects.create(
-                location_id=UserAddress.objects.get(slug=validated_data.get('address')).id,
+                location_id=user_address.id,
                 cart_id=cart.id,
-                total_price=cart.total_price,
+                total_price=cart.total_price + charge,
                 customer=validated_data.get('user'),
-                payment_method=validated_data.get('payment')
+                payment_method=validated_data.get('payment'),
+                delivery_charge=charge
             )
             validated_data['slug'] = checkout.slug
             for cart_product in cart_products:
                 CheckoutProduct.objects.create(
                     checkout=checkout,
                     product=cart_product.product,
+                    merchant=cart_product.product.merchant,
                     quantity=cart_product.quantity,
                     selling_price=cart_product.product.selling_price
                 )
         return validated_data
-        # try:
-        #     checkout = Checkout.objects.create(
-        #         location_id=validated_data.get('address'),
-        #         cart_id=validated_data.get('cart'),
-        #         total_price=cart.total_price,
-        #         customer=validated_data.get('user'),
-        #         payment_method=validated_data.get('payment')
-        #     )
-        #     for cart_product in cart_products:
-        #         CheckoutProduct.objects.create(
-        #             checkout=checkout,
-        #             product=cart_product.product,
-        #             quantity=cart_product.quantity,
-        #             selling_price=cart_product.product.selling_price
-        #         )
-        # except IntegrityError:
-        #     raise ValidationError("Something is wrong. Please try again")

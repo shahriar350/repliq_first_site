@@ -1,10 +1,15 @@
+from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from client_app.models import Tenant
+from pharmaco_backend.utils import PageNumberPaginationWithCount
+from product_app.models import Product
 from public_app.documentation_serializers import TenantAvailabilityResponseSerializer
+from public_app.serializers import ProductListPublicSerializer
 
 
 # Create your views here.
@@ -30,3 +35,12 @@ class TenantAvailabilityCheckView(APIView):
             return Response({
                 "available": False
             }, status=status.HTTP_204_NO_CONTENT)
+
+
+class ProductListView(ListAPIView):
+    pagination_class = PageNumberPaginationWithCount
+    serializer_class = ProductListPublicSerializer
+
+    def get_queryset(self):
+        return Product.objects.prefetch_related('base_product__category').filter(
+            Q(active=True) & Q(deleted_at__isnull=True)).order_by('slug')

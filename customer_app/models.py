@@ -75,5 +75,10 @@ class CheckoutDeliveryStatus(DirtyFieldsMixin, PreModel):
         (4, 'Reached'),
         (5, 'Completed'),
     )
-    checkout = models.ForeignKey(Checkout, on_delete=models.CASCADE, related_name='get_checkout_delivery_status')
+    checkout = models.ForeignKey(Checkout, on_delete=models.CASCADE, related_name='get_checkout_delivery_status',
+                                 blank=True)
+    checkout_product = models.ForeignKey(CheckoutProduct, on_delete=models.CASCADE,
+                                         related_name='get_checkout_product_delivery_status')
+    merchant = models.ForeignKey(User, on_delete=models.CASCADE, blank=True,
+                                 related_name='get_merchant_delivery_status')
     status = models.PositiveSmallIntegerField(default=0, choices=status_choices)

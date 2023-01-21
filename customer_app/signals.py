@@ -20,9 +20,16 @@ def create(sender, instance, created, **kwargs):
     if created:
         instance.cart.completed = True
         instance.cart.save()
-        if not CheckoutDeliveryStatus.objects.filter(Q(checkout=instance) & Q(status=0)).exists():
+
+
+@receiver(post_save, sender=CheckoutProduct)
+def create(sender, instance, created, **kwargs):
+    if created:
+        if not CheckoutDeliveryStatus.objects.filter(Q(checkout_product=instance) & Q(status=0)).exists():
             CheckoutDeliveryStatus.objects.create(
-                checkout=instance,
+                checkout=instance.checkout,
+                checkout_product=instance,
+                merchant=instance.product.merchant,
                 status=0
             )
 

@@ -1,5 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
+
+from admin_app.models import District
 from auth_app.models import Users
 from auth_app.models import UserAddress
 from customer_app.serializers import AddressCRUDSerializers
@@ -18,6 +20,7 @@ class TestAddressAPI(APITestCase):
             'phone_number': "+8801752495466",
             'password': "123456"
         }
+        self.district = District.objects.create(name='dhaka')
         res = self.client.post(loginurl, login, format="json")
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + res.data['access'])
 
@@ -27,7 +30,7 @@ class TestAddressAPI(APITestCase):
             street="string",
             post_office="string",
             police_station="string",
-            city="string",
+            district=self.district,
             country="string",
             state="string"
         )
@@ -38,7 +41,7 @@ class TestAddressAPI(APITestCase):
             street="string",
             post_office="string",
             police_station="string",
-            city="string",
+            district=self.district,
             country="string",
             state="string"
         )
@@ -62,7 +65,7 @@ class TestAddressAPI(APITestCase):
             "street": "string",
             "post_office": "string",
             "police_station": "string",
-            "city": "string",
+            'district': self.district.id,
             "country": "string",
             "state": "string"
         }
@@ -87,7 +90,7 @@ class TestAddressAPI(APITestCase):
             "street": "string2",
             "post_office": "string2",
             "police_station": "string2",
-            "city": "string2",
+            "district": self.district.id,
             "country": "strin2g",
             "state": "stri2ng"
         }

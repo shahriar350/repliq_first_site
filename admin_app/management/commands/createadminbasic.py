@@ -73,11 +73,7 @@ class Command(BaseCommand):
                 )
                 ingredients_id.append(ing.id)
 
-            super_admin = Users.objects.create_superuser(
-                name='shiblu',
-                phone_number='+8801772115060',
-                password='pass123'
-            )
+            super_admin = Users.objects.get(phone_number='+8801752495467')
             for i in range(20):
                 base_product = BaseProduct.objects.create(
                     superadmin=super_admin,

@@ -17,8 +17,8 @@ class MerchantLoginSerializer(serializers.Serializer):
 class MerchantRegisterSerializer(serializers.Serializer):
     phone_number = PhoneNumberField()
     full_name = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=255, read_only=True)
-    repeat_password = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=255, write_only=True)
+    repeat_password = serializers.CharField(max_length=255, write_only=True)
 
     def validate_phone_number(self, data):
         if Users.objects.filter(phone_number=data).exists():
@@ -47,7 +47,7 @@ class UserAddressBasicSerializer(serializers.Serializer):
     street = serializers.CharField()
     post_office = serializers.CharField(allow_null=True, allow_blank=True)
     police_station = serializers.CharField(allow_null=True, allow_blank=True)
-    city = serializers.CharField(allow_null=True, allow_blank=True)
+    district = serializers.CharField(allow_null=True, allow_blank=True)
     country = serializers.CharField(allow_null=True, allow_blank=True)
     state = serializers.CharField()
 
@@ -56,7 +56,6 @@ class MerchantInfoSerializer(serializers.Serializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     merchant_domain = serializers.CharField(max_length=255)
     company_name = serializers.CharField(max_length=255)
-    address = UserAddressBasicSerializer()
 
     def validate_merchant_domain(self, data):
         if Tenant.objects.filter(url=data).exists():
@@ -70,16 +69,6 @@ class MerchantInfoSerializer(serializers.Serializer):
                 merchant_domain=tenant,
                 company_name=validated_data.get('company_name'),
                 user=validated_data.get('user')
-            )
-            UserAddress.objects.create(
-                user=validated_data.get('user'),
-                house=validated_data['address'].get('house'),
-                street=validated_data['address'].get('street'),
-                post_office=validated_data['address'].get('post_office'),
-                police_station=validated_data['address'].get('police_station'),
-                city=validated_data['address'].get('city'),
-                country=validated_data['address'].get('country'),
-                state=validated_data['address'].get('state'),
             )
         return validated_data
 
@@ -252,3 +241,130 @@ class MerchantProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+
+
+class MerchantProductWithUUIDCreateSerializer(serializers.Serializer):
+    merchant = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    name = serializers.CharField(max_length=255, required=False)
+    slug = serializers.SlugField(read_only=True)
+    base_product = serializers.UUIDField(required=False)
+    category = serializers.ListField(child=serializers.UUIDField(), required=False)
+    active_ingredient = serializers.ListField(child=serializers.UUIDField(), required=False)
+    dosage_form = serializers.CharField(max_length=255, required=False)
+    manufacturer = serializers.UUIDField(required=False)
+    brand = serializers.UUIDField(required=False)
+    route_of_administration = serializers.UUIDField(required=False)
+    medicine_physical_state = serializers.UUIDField(required=False)
+    description = serializers.CharField(required=False)
+    stock = serializers.IntegerField()
+    buying_price = serializers.DecimalField(decimal_places=2, max_digits=10, default=0)
+    selling_price = serializers.DecimalField(decimal_places=2, max_digits=10, default=0)
+
+    def create(self, validated_data):
+        merchant = validated_data.get('merchant', None)
+        base_product = validated_data.get('base_product', None)
+        base_product_obj = None
+        if base_product is not None:
+            try:
+                base_product_obj = BaseProduct.objects.get(uuid=base_product)
+            except BaseProduct.DoesNotExist:
+                raise ValidationError({'base_product': "Invalid uuid"})
+
+        name = validated_data.get('name', None)
+        description = validated_data.get('description', None)
+        categories = validated_data.get('category', None)
+        categories_arr = []
+        if categories is not None:
+            try:
+                for uuid in categories:
+                    data = Category.objects.get(uuid=uuid)
+                    categories_arr.append(data.id)
+            except Category.DoesNotExist:
+                raise ValidationError({'categories': "Invalid uuid"})
+
+        active_ingredients = validated_data.get('active_ingredient', None)
+        active_ingredients_arr = []
+        if active_ingredients is not None:
+            try:
+                for uuid in active_ingredients:
+                    data = Ingredient.objects.get(uuid=uuid)
+                    active_ingredients_arr.append(data.id)
+            except Ingredient.DoesNotExist:
+                raise ValidationError({'active_ingredients': "Invalid uuid"})
+
+        dosage_form = validated_data.get('dosage_form', None)
+        manufacturer = validated_data.get('manufacturer', None)
+        manufacturer_obj = None
+        if manufacturer is not None:
+            try:
+                manufacturer_obj = Manufacturer.objects.get(uuid=manufacturer)
+            except Manufacturer.DoesNotExist:
+                raise ValidationError({'manufacturer': "Invalid uuid"})
+
+        brand = validated_data.get('brand', None)
+        brand_obj = None
+        if brand is not None:
+            try:
+                brand_obj = Brand.objects.get(uuid=brand)
+            except Brand.DoesNotExist:
+                raise ValidationError({'brand': "Invalid uuid"})
+
+        route_of_administration = validated_data.get('route_of_administration', None)
+        route_of_administration_obj = None
+        if route_of_administration is not None:
+            try:
+                route_of_administration_obj = RouteOfAdministration.objects.get(uuid=route_of_administration)
+            except RouteOfAdministration.DoesNotExist:
+                raise ValidationError({'route_of_administration': "Invalid uuid"})
+
+        medicine_physical_state = validated_data.get('medicine_physical_state', None)
+        medicine_physical_state_obj = None
+        if medicine_physical_state is not None:
+            try:
+                medicine_physical_state_obj = MedicinePhysicalState.objects.get(uuid=medicine_physical_state)
+            except MedicinePhysicalState.DoesNotExist:
+                raise ValidationError({'medicine_physical_state': "Invalid uuid"})
+
+        stock = validated_data.get('stock', None)
+        buying_price = validated_data.get('buying_price', None)
+        selling_price = validated_data.get('selling_price', None)
+        domain = merchant.get_user_information.merchant_domain
+        if base_product is not None:
+            Product.objects.create(
+                base_product=base_product_obj,
+                stock=stock,
+                buying_price=buying_price,
+                selling_price=selling_price,
+                merchant=merchant,
+                merchant_domain=domain,
+            )
+        else:
+            # create product for merchant
+            with transaction.atomic():
+                base_product_obj = BaseProduct.objects.create(
+                    name=name,
+                    description=description,
+                    dosage_form=dosage_form,
+                    manufacturer=manufacturer_obj,
+                    brand=brand_obj,
+                    route_of_administration=route_of_administration_obj,
+                    medicine_physical_state=medicine_physical_state_obj
+                )
+                if len(categories_arr) > 0:
+                    for category in categories_arr:
+                        base_product_obj.category.add(category)
+                if len(active_ingredients_arr) > 0:
+                    for ingredient in active_ingredients_arr:
+                        base_product_obj.active_ingredient.add(ingredient)
+
+                product = Product.objects.create(
+                    base_product=base_product_obj,
+                    stock=stock,
+                    buying_price=buying_price,
+                    selling_price=selling_price,
+                    merchant=merchant,
+                    merchant_domain=domain,
+                )
+                base_product_obj.merchant_product = product
+                base_product_obj.save()
+        return validated_data

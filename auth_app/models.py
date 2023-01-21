@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from versatileimagefield.fields import VersatileImageField, PPOIField
 from autoslug import AutoSlugField
+
 from client_app.models import Tenant
 from pharmaco_backend.utils import PreModel
 import uuid
@@ -22,6 +23,7 @@ class CustomUserManager(BaseUserManager):
         if not password:
             raise ValidationError(_('Password is required'))
         extra_fields.setdefault("active", True)
+        extra_fields.setdefault("is_verified", True)
         user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
         user.name = name.title()
@@ -118,7 +120,7 @@ class Users(DirtyFieldsMixin, AbstractBaseUser, PermissionsMixin):
 
     def is_merchant(self):
         return self.groups.filter(
-            Q(name="merchant_owner") | Q(name="merchant_admin") | Q(name="merchant_staff")).exists()
+            Q(name="merchant_owner") | Q(name="merchant_admin") | Q(name="merchant_staff")).exists() | False
 
     def __str__(self):
         return str(self.phone_number)
@@ -162,7 +164,8 @@ class UserAddress(DirtyFieldsMixin, PreModel):
     street = models.CharField(verbose_name="Street name", max_length=255, null=True, blank=True)
     post_office = models.CharField(verbose_name="Post office name", max_length=255)
     police_station = models.CharField(verbose_name="Police station name", max_length=255)
-    city = models.CharField(verbose_name="City name", max_length=255)
+    district = models.ForeignKey('admin_app.District', on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name='get_district_user_addresses')
     country = models.CharField(verbose_name="Country name", max_length=255)
     state = models.CharField(verbose_name="State name", max_length=255, null=True, blank=True)
 

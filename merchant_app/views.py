@@ -16,7 +16,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from merchant_app.documentation_serializers import MerchantLogin200Serializer
 from merchant_app.serializers import MerchantLoginSerializer, MerchantRegisterSerializer, MerchantInfoSerializer, \
     MerchantProductCreateSerializer, CreateMerchantAdminSerializer, MerchantProductUpdateSerializer, \
-    MerchantProductImageAddSerializer, MerchantProductSerializer
+    MerchantProductImageAddSerializer, MerchantProductSerializer, MerchantProductWithUUIDCreateSerializer
 from otp_app.models import UserOTP
 from pharmaco_backend.permissions import IsMerchant, IsMerchantOwnerOrAdmin, IsMerchantAdmin, IsMerchantOwner
 from pharmaco_backend.utils import otpgen
@@ -24,18 +24,10 @@ from product_app.models import Product, BaseProduct
 
 
 # Create your views here.
-class MerchantLogin(APIView):
+class MerchantLogin(CreateAPIView):
     serializer_class = MerchantLoginSerializer
 
-    @extend_schema(
-        summary="Only merchant can login here",
-        responses={
-            201: OpenApiResponse(response=MerchantLogin200Serializer,
-                                 description='A otp will sent to user phone if user is a merchant.'),
-            400: OpenApiResponse(description='Bad request (something invalid)'),
-        },
-    )
-    def post(self, request, format=None):
+    def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         phone_number = serializer.validated_data.get('phone_number')
@@ -65,7 +57,8 @@ class MerchantInfoAddView(CreateAPIView):
 
 class AddProductView(CreateAPIView):
     permission_classes = (IsMerchant,)
-    serializer_class = MerchantProductCreateSerializer
+    serializer_class = MerchantProductWithUUIDCreateSerializer
+    # serializer_class = MerchantProductCreateSerializer
 
 
 @extend_schema(
@@ -154,8 +147,8 @@ class RemoveImageFromProductView(DestroyAPIView):
             raise NotFound(detail="Product cannot found.")
 
 
-class MerchantAuthCheckView(ListAPIView):
+class MerchantAuthCheckView(APIView):
     permission_classes = [IsMerchant]
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         return Response(status=status.HTTP_200_OK)

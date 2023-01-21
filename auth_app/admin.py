@@ -36,7 +36,7 @@ class UserAddressAdmin(admin.ModelAdmin):
     list_display = [
         'uuid',
         'label',
-        'city',
+        'district',
     ]
     list_filter = [
         'active',

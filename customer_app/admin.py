@@ -1,6 +1,14 @@
 from django.contrib import admin
 from .models import Cart, CartProduct, Checkout, CheckoutProduct, CheckoutDeliveryStatus
+
+
 # Register your models here.
+
+class CartProductAdminInline(admin.StackedInline):
+    model = CartProduct
+    fk_name = "cart"
+
+
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
     model = Cart
@@ -15,8 +23,10 @@ class CartAdmin(admin.ModelAdmin):
     list_filter = (
         'active',
         'completed',
-        ('deleted_at',admin.EmptyFieldListFilter)
+        ('deleted_at', admin.EmptyFieldListFilter)
     )
+    inlines = (CartProductAdminInline,)
+
 
 @admin.register(CartProduct)
 class CartProductAdmin(admin.ModelAdmin):
@@ -34,8 +44,9 @@ class CartProductAdmin(admin.ModelAdmin):
         'product',
         'merchant',
         'active',
-        ('deleted_at',admin.EmptyFieldListFilter)
+        ('deleted_at', admin.EmptyFieldListFilter)
     )
+
 
 @admin.register(Checkout)
 class CheckoutAdmin(admin.ModelAdmin):
@@ -56,8 +67,9 @@ class CheckoutAdmin(admin.ModelAdmin):
         'completed',
         'payment_method',
         'active',
-        ('deleted_at',admin.EmptyFieldListFilter)
+        ('deleted_at', admin.EmptyFieldListFilter)
     )
+
 
 @admin.register(CheckoutProduct)
 class CheckoutProductAdmin(admin.ModelAdmin):
@@ -73,8 +85,9 @@ class CheckoutProductAdmin(admin.ModelAdmin):
     list_filter = (
         'merchant',
         'active',
-        ('deleted_at',admin.EmptyFieldListFilter)
+        ('deleted_at', admin.EmptyFieldListFilter)
     )
+
 
 @admin.register(CheckoutDeliveryStatus)
 class CheckoutDeliveryStatusAdmin(admin.ModelAdmin):
@@ -87,5 +100,5 @@ class CheckoutDeliveryStatusAdmin(admin.ModelAdmin):
 
     list_filter = (
         'active',
-        ('deleted_at',admin.EmptyFieldListFilter)
+        ('deleted_at', admin.EmptyFieldListFilter)
     )

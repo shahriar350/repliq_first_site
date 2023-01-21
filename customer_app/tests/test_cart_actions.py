@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 
+from admin_app.models import District
 from auth_app.models import Users, MerchantInformation, UserAddress
 from client_app.models import Tenant
 from customer_app.models import Cart, CartProduct
@@ -18,13 +19,14 @@ class TestCartAction(APITestCase):
             phone_number="+8801752495466",
             password="123456"
         )
+        self.district = District.objects.create(name='dhaka')
         self.address = UserAddress.objects.create(
             user=self.user,
             house='hello',
             street='hello',
             post_office='hello',
             police_station='hello',
-            city='hello',
+            district=self.district,
             country='hello',
             state='hello',
 
