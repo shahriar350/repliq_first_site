@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'search_app.apps.SearchAppConfig',
 
     'drf_spectacular',
+    'django_cleanup.apps.CleanupConfig',
 
 ]
 

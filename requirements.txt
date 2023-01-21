@@ -16,3 +16,4 @@ drf-spectacular==0.25.1
 python-magic-bin==0.4.14
 django-autoslug==1.9.8
 Faker==16.4.0
+django-cleanup==6.0.0
