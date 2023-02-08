@@ -58,10 +58,23 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
+db.sqlite3
+db.sqlite3-journal
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
+**/__pycache__/
+__pycache__
 
 # Flask stuff:
 instance/
 .webassets-cache
+media
+media/
+static
+static/
+staticfiles
+staticfiles/
 
 # Scrapy stuff:
 .scrapy
@@ -149,11 +162,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-**/__pycache__/
-__pycache__
+identifier.sqlite
+identifier.sqlite/
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
